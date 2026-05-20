@@ -1,0 +1,70 @@
+#!/bin/sh
+set -eu
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+run() {
+  name="$1"
+  shift
+
+  printf '\n==> %s\n' "$name"
+  "$@"
+}
+
+skip() {
+  printf '\n==> %s\n' "$1"
+  printf 'Skipped: %s\n' "$2"
+}
+
+if [ -n "${PRECOMMIT_LINT_CMD:-}" ]; then
+  run "lint" sh -c "$PRECOMMIT_LINT_CMD"
+elif [ -x ./gradlew ]; then
+  run "lint" ./gradlew check
+elif [ -f build.gradle ] || [ -f build.gradle.kts ]; then
+  run "lint" gradle check
+elif [ -x ./mvnw ]; then
+  if grep -Eq 'maven-checkstyle-plugin|spotless|pmd|spotbugs' pom.xml; then
+    run "lint" ./mvnw verify -DskipTests
+  else
+    skip "lint" "no Maven lint plugin found in pom.xml"
+  fi
+elif [ -f pom.xml ]; then
+  if grep -Eq 'maven-checkstyle-plugin|spotless|pmd|spotbugs' pom.xml; then
+    run "lint" mvn verify -DskipTests
+  else
+    skip "lint" "no Maven lint plugin found in pom.xml"
+  fi
+else
+  skip "lint" "no Gradle or Maven project found"
+fi
+
+if [ -n "${PRECOMMIT_BUILD_CMD:-}" ]; then
+  run "build" sh -c "$PRECOMMIT_BUILD_CMD"
+elif [ -x ./gradlew ]; then
+  run "build" ./gradlew build -x test
+elif [ -f build.gradle ] || [ -f build.gradle.kts ]; then
+  run "build" gradle build -x test
+elif [ -x ./mvnw ]; then
+  run "build" ./mvnw package -DskipTests
+elif [ -f pom.xml ]; then
+  run "build" mvn package -DskipTests
+else
+  skip "build" "no Gradle or Maven project found"
+fi
+
+if [ -n "${PRECOMMIT_TEST_CMD:-}" ]; then
+  run "test" sh -c "$PRECOMMIT_TEST_CMD"
+elif [ -x ./gradlew ]; then
+  run "test" ./gradlew test
+elif [ -f build.gradle ] || [ -f build.gradle.kts ]; then
+  run "test" gradle test
+elif [ -x ./mvnw ]; then
+  run "test" ./mvnw test
+elif [ -f pom.xml ]; then
+  run "test" mvn test
+else
+  skip "test" "no Gradle or Maven project found"
+fi
+
+printf '\nPre-commit checks passed.\n'
