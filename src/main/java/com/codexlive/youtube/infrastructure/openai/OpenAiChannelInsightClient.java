@@ -1,14 +1,18 @@
 package com.codexlive.youtube.infrastructure.openai;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
+
 import com.codexlive.youtube.application.ExternalApiException;
 import com.codexlive.youtube.application.MissingApiKeyException;
 import com.codexlive.youtube.domain.ChannelInsight;
 import com.codexlive.youtube.domain.ChannelSnapshot;
 import com.codexlive.youtube.domain.port.ChannelInsightClient;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import com.codexlive.youtube.infrastructure.ChannelInsightPrompt;
 
 @Component
+@Profile("!dev & !ollama")
 public class OpenAiChannelInsightClient implements ChannelInsightClient {
 
     private final String apiKey;
@@ -36,7 +40,10 @@ public class OpenAiChannelInsightClient implements ChannelInsightClient {
 
         OpenAiInsightResponse response;
         try {
-            response = gateway.generateInsight(apiKey, new OpenAiInsightRequest(model, buildInput(snapshot)));
+            response = gateway.generateInsight(
+                apiKey,
+                new OpenAiInsightRequest(model, ChannelInsightPrompt.buildUserInput(snapshot))
+            );
         } catch (RuntimeException exception) {
             throw new ExternalApiException("OpenAI API 호출에 실패했습니다.", exception);
         }
@@ -46,28 +53,6 @@ public class OpenAiChannelInsightClient implements ChannelInsightClient {
             response.strengths(),
             response.opportunities(),
             response.nextActions()
-        );
-    }
-
-    private String buildInput(ChannelSnapshot snapshot) {
-        return """
-            You are a YouTube channel strategy analyst. Return Korean insights for this public channel.
-            Focus on actionable advice based only on the public fields below.
-            Provide at least three nextActions. Each next action must start with a concrete verb.
-
-            channelId=%s
-            title=%s
-            description=%s
-            subscriberCount=%d
-            viewCount=%d
-            videoCount=%d
-            """.formatted(
-            snapshot.id(),
-            snapshot.title(),
-            snapshot.description(),
-            snapshot.subscriberCount(),
-            snapshot.viewCount(),
-            snapshot.videoCount()
         );
     }
 }

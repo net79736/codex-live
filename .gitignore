@@ -9,6 +9,10 @@ out/
 next-env.d.ts
 tsconfig.tsbuildinfo
 
+# IDE (개인 로컬 설정 — 저장소에 올리지 않음)
+.idea/** 
+.vscode/**
+
 # Java / Gradle build outputs
 .gradle/
 build/

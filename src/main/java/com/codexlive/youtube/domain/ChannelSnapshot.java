@@ -2,14 +2,17 @@ package com.codexlive.youtube.domain;
 
 import java.util.Objects;
 
+/**
+ * 채널 정보를 저장하는 레코드
+ */
 public record ChannelSnapshot(
-    String id,
-    String title,
-    String description,
-    String thumbnailUrl,
-    long subscriberCount,
-    long viewCount,
-    long videoCount
+    String id, // 채널 ID
+    String title, // 채널 제목
+    String description, // 채널 설명
+    String thumbnailUrl, // 채널 썸네일
+    long subscriberCount, // 구독자 수
+    long viewCount, // 조회수
+    long videoCount // 영상 수
 ) {
 
     public ChannelSnapshot {

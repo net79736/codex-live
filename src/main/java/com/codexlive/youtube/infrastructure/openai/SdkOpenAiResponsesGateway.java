@@ -1,14 +1,18 @@
 package com.codexlive.youtube.infrastructure.openai;
 
+import java.util.List;
+
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
+
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.models.ChatModel;
 import com.openai.models.responses.ResponseCreateParams;
 import com.openai.models.responses.StructuredResponseCreateParams;
-import java.util.List;
-import org.springframework.stereotype.Component;
 
 @Component
+@Profile("!dev & !ollama")
 class SdkOpenAiResponsesGateway implements OpenAiResponsesGateway {
 
     @Override
