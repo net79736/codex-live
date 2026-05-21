@@ -74,3 +74,65 @@ MCP는 Codex가 로컬 컴퓨터를 넘어 외부 도구, API, 타사 서비스�
 "지금 에러 로그 분석해서 사내 슬랙 채널에 공유해줘" ➡️ MCP 연동으로 외부 시스템 제어
 
 질문하신 대로 AGENTS.md, skills, hooks를 제대로 이해하고 있다면 이미 Codex 개발의 90% 이상을 파악하신 게 맞습니다! 여기에 외부 연동을 위한 MCP 구조만 가볍게 얹어주시면 완벽한 커스텀 에이전트를 만드실 수 있습니다.
+
+---
+
+## Harness / execute.py / docs 로딩 정리
+
+헷갈리기 쉬운 부분만 다시 짧게 정리하면 아래와 같습니다.
+
+### 1. `harness`로 작업해줘 라고 말했을 때
+
+- Codex는 먼저 `.codex/skills/harness/SKILL.md`를 읽는다.
+- 이건 "하네스 방식으로 어떻게 일할지"에 대한 작업 매뉴얼을 여는 것이다.
+- 이 말만으로 `scripts/execute.py`가 자동 실행되지는 않는다.
+- 이 말만으로 `docs/*.md` 전체가 자동 주입되지는 않는다.
+
+즉:
+
+> `harness로 해줘` = harness 스킬 로드
+
+### 2. `scripts/execute.py`를 실행할 때
+
+터미널에서 직접 실행하는 스크립트다.
+
+```bash
+python3 scripts/execute.py 0-mvp
+```
+
+이때는 코드상으로 다음이 자동으로 일어난다.
+
+- `AGENTS.md` 로드
+- `docs/*.md` 전체 로드
+- 해당 phase의 `step*.md` 로드
+- 완료된 이전 step의 `summary` 누적 전달
+
+즉:
+
+> `execute.py 실행` = docs 전체 자동 주입 + step 순차 실행
+
+추가로, 이 스크립트는 보통의 일상적인 Codex 채팅 작업에서 매번 쓰는 기본 흐름은 아니다.
+작은 기능 수정이나 일반 구현은 그냥 채팅에서 바로 시키는 경우가 더 많다.
+`execute.py`는 큰 작업을 step으로 강하게 쪼개고, 재시도/상태관리/커밋까지 포함한 반자동 파이프라인이 필요할 때 쓰는 선택적 도구에 가깝다.
+
+### 3. `phases/` 폴더는 언제 읽히나
+
+- 일반 채팅에서 항상 읽히는 폴더는 아니다.
+- `harness` 방식으로 phase/step을 설계할 때 참고 대상이 된다.
+- `scripts/execute.py`를 실행하면 해당 phase의 `index.json`, `step*.md`는 실제 입력으로 읽힌다.
+
+즉:
+
+> `phases/` = 하네스 자동 실행용 작업 지시서
+
+### 4. `docs/`는 언제 읽히나
+
+- 사용자가 직접 `docs 읽고 해줘`라고 요청할 때
+- Codex가 작업상 필요하다고 판단해 직접 열 때
+- `scripts/execute.py`를 실행할 때 자동으로 전체 주입될 때
+
+중요한 구분:
+
+> `harness 스킬 사용`과 `execute.py 실행`은 같은 일이 아니다.
+
+`harness`는 작업 방식이고, `execute.py`는 그 작업 지시서를 실제로 돌리는 런너다.
