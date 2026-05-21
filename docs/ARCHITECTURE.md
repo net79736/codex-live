@@ -6,7 +6,8 @@
 - Spring MVC
 - JUnit 5
 - YouTube Data API v3
-- OpenAI Responses API
+- OpenAI Responses API (기본 프로필)
+- Ollama (로컬 `ollama` 프로필)
 
 ## 계층 규칙
 - `interfaces`는 HTTP 요청/응답, validation, status code, exception mapping만 담당한다.
@@ -50,7 +51,7 @@ src/test/java/com/codexlive/youtube/
 
 ## 외부 의존성
 - `YoutubeChannelClient`: YouTube Data API 호출 포트
-- `ChannelInsightClient`: OpenAI 분석 호출 포트
+- `ChannelInsightClient`: 채널 인사이트 분석 포트 (OpenAI 기본, Ollama `ollama` 프로필)
 - 테스트에서는 두 포트를 fake/mock으로 대체한다.
 
 ## DDD 설계 기준
@@ -62,8 +63,15 @@ src/test/java/com/codexlive/youtube/
 
 ## 설정
 - `YOUTUBE_API_KEY`: YouTube Data API 키
-- `OPENAI_API_KEY`: OpenAI API 키
-- `OPENAI_MODEL`: 분석 모델. 기본값은 별도 문서나 구현 시점에 공식 문서를 확인해 정한다.
+- `OPENAI_API_KEY`: OpenAI API 키 (기본 프로필)
+- `OPENAI_MODEL`: OpenAI 분석 모델
+- `OLLAMA_BASE_URL`: Ollama API 주소 (기본 `http://localhost:11434`, `ollama` 프로필)
+- `OLLAMA_MODEL`: Ollama 분석 모델 (기본 `qwen2.5:14b`, `ollama` 프로필)
+
+### Spring 프로필
+- `dev`: Stub 인사이트 (OpenAI·Ollama 불필요)
+- `ollama`: 로컬 Ollama 인사이트 (OpenAI 키 불필요)
+- 기본: OpenAI 인사이트
 
 ## 오류 처리
 - 잘못된 URL: `400 Bad Request`

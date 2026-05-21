@@ -6,7 +6,7 @@
 - `/docs/ARCHITECTURE.md`
 - `/docs/ADR.md`
 - `/docs/adr/007-openai-responses-structured-outputs.md`
-- `/docs/adr/010-openai-java-sdk-directly.md`
+- `/docs/adr/008-openai-java-sdk-directly.md`
 - `/phases/0-mvp/step4-output.json`
 
 ## 작업
