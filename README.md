@@ -28,7 +28,7 @@ AGENTS.md
 .codex/hooks.json
 .codex/hooks/
 .codex/skills/
-.claude/tdd-guard/data/instructions.md
+.codex/tdd-guard/data/instructions.md
 .githooks/pre-commit
 docs/
 scripts/
@@ -171,10 +171,11 @@ TDD Guard는 Codex가 테스트 없이 구현부터 해버리는 것을 막기 �
 설정 파일:
 
 ```text
-.claude/tdd-guard/data/instructions.md
+.codex/tdd-guard/data/instructions.md
 ```
 
-폴더 이름이 `.claude`라서 헷갈릴 수 있는데, TDD Guard 자체가 원래 Claude Code용으로 만들어진 도구라 기본 데이터 경로가 이렇다. Codex에서 쓰더라도 TDD Guard는 이 경로를 사용한다.
+이 repo에서는 TDD Guard 설정을 Codex 기준 경로인 `.codex/tdd-guard/data/`에서 관리한다.
+`.codex/hooks/tdd_guard.py`가 `tdd-guard` 실행 전에 필요한 호환 데이터를 `.codex/tdd-guard/compat/` 아래에 준비하므로, repo 루트의 `.claude`는 사용하지 않는다.
 
 이 파일에는 이런 규칙이 들어 있다.
 
@@ -258,8 +259,8 @@ docs/ADR.md
 읽는 순서:
 
 1. `docs/PRD.md`
-   - 무엇을 만들지 적는 문서다.
-   - 기능 요구사항, 만들지 않을 것 등을 적는다.
+   - 제품 요구사항 정의서다.
+   - 문제 정의, 사용자, 유저 스토리, 유저 플로우, 화면 상태, MVP 요구사항, 성공 기준을 적는다.
 
 2. `docs/ARCHITECTURE.md`
    - 프로젝트 구조와 계층 규칙을 적는 문서다.
@@ -273,7 +274,27 @@ docs/ADR.md
    - UI가 있는 프로젝트라면 화면 디자인 방향을 적는다.
    - API 서버만 있는 백엔드 프로젝트라면 비워두거나 최소화해도 된다.
 
-Codex에게 큰 작업을 시킬 때는 "먼저 docs를 읽고 작업해"라고 말하면 좋다.
+Codex가 `docs/`를 읽는 시점:
+
+1. 사용자가 직접 요청할 때
+   - 예: "docs 먼저 읽고 구현해줘", "PRD 기준으로 리뷰해줘".
+
+2. 작업 성격상 문서가 필요하다고 판단될 때
+   - 큰 기능 구현, 설계 변경, UI 작업, 아키텍처 판단, 리뷰처럼 제품 의도나 구조 기준이 필요한 경우 Codex가 먼저 관련 문서를 확인한다.
+
+3. Harness 실행 도구를 사용할 때
+   - `scripts/execute.py`는 step 실행 전에 `AGENTS.md`와 `docs/*.md`를 읽어 Codex 프롬프트에 함께 넣는다.
+
+4. Harness skill이나 review skill을 사용할 때
+   - `.codex/skills/harness/SKILL.md`는 작업 계획을 만들 때 `docs/`를 읽도록 안내한다.
+   - `.codex/skills/harness-review/SKILL.md`는 리뷰할 때 `docs/ARCHITECTURE.md`, `docs/ADR.md` 등을 기준으로 확인한다.
+
+중요한 점:
+
+- 일반 대화마다 Codex가 `docs/` 전체를 자동으로 항상 읽는 것은 아니다.
+- 항상 지켜야 하는 짧고 강한 규칙은 `AGENTS.md`에 둔다.
+- 제품 의도, 유저 플로우, 아키텍처 배경처럼 길고 상세한 기준은 `docs/`에 둔다.
+- 그래서 큰 작업을 시킬 때는 "docs 읽고"라고 말하면 가장 확실하다.
 
 ## scripts/
 
@@ -385,6 +406,7 @@ mvn test
 - `AGENTS.md`는 Codex가 보는 기본 규칙 파일이다. 이름을 `AGENT.md`로 바꾸지 말 것.
 - `.codex/hooks.json`은 hook 목록이다. 어떤 자동 실행이 걸려 있는지 보고 싶으면 이 파일을 보면 된다.
 - `.codex/config.toml`에는 hook 기능 활성화만 둔다.
-- `.claude/tdd-guard/data/`는 이름이 Claude여도 TDD Guard가 쓰는 기본 경로라 유지한다.
+- TDD Guard 설정은 `.codex/tdd-guard/data/`에서 관리한다.
+- TDD Guard 호환 데이터가 필요하면 `.codex/tdd-guard/compat/` 아래에 생성한다.
 - Java Spring 프로젝트 파일이 생기면 TDD Guard JUnit5 reporter dependency를 추가해야 한다.
 - 커밋 전에 `git status`를 보고 untracked 파일이 빠지지 않았는지 확인한다.
