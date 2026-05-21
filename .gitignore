@@ -9,6 +9,11 @@ out/
 next-env.d.ts
 tsconfig.tsbuildinfo
 
+# Java / Gradle build outputs
+.gradle/
+build/
+target/
+
 # phase execution outputs
 phases/**/phase*-output.json
 phases/**/step*-output.json

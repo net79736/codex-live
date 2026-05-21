@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>YouTube Channel Insights</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <main class="app-shell">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">YouTube Channel Insights</p>
+                <h1>공개 채널 데이터를 실행 가능한 인사이트로 바꾸기</h1>
+            </div>
+        </header>
+
+        <section class="analysis-form-section" aria-labelledby="analysis-form-title">
+            <div>
+                <h2 id="analysis-form-title">채널 URL 분석</h2>
+                <p class="support-text">지원 형식: <span>youtube.com/channel/...</span>, <span>youtube.com/@handle</span>, <span>youtube.com/user/...</span></p>
+            </div>
+            <form id="analysis-form" class="analysis-form" novalidate>
+                <label for="channel-url" class="visually-hidden">YouTube 채널 URL</label>
+                <input id="channel-url" name="channelUrl" type="url" autocomplete="url" placeholder="https://www.youtube.com/@channelname">
+                <button id="submit-button" type="submit">분석</button>
+            </form>
+            <div id="status" class="status" role="status" aria-live="polite"></div>
+            <div id="error" class="error" role="alert" hidden></div>
+        </section>
+
+        <section id="empty-state" class="empty-state">
+            <h2>분석 결과가 여기에 표시됩니다</h2>
+            <p>채널명, 공개 지표, AI 요약, 강점, 개선 기회, 다음 액션을 분리해서 보여줍니다.</p>
+        </section>
+
+        <section id="results" class="results" hidden>
+            <article class="panel channel-panel" aria-labelledby="channel-title">
+                <div class="channel-head">
+                    <img id="channel-thumbnail" alt="" class="thumbnail">
+                    <div>
+                        <h2 id="channel-title"></h2>
+                        <p id="channel-description" class="description"></p>
+                    </div>
+                </div>
+                <dl class="metrics">
+                    <div>
+                        <dt>구독자</dt>
+                        <dd id="subscriber-count">0</dd>
+                    </div>
+                    <div>
+                        <dt>총 조회수</dt>
+                        <dd id="view-count">0</dd>
+                    </div>
+                    <div>
+                        <dt>영상 수</dt>
+                        <dd id="video-count">0</dd>
+                    </div>
+                </dl>
+            </article>
+
+            <article class="panel insight-panel" aria-labelledby="insight-title">
+                <h2 id="insight-title">AI 인사이트</h2>
+                <p id="summary" class="summary"></p>
+                <div class="insight-grid">
+                    <section>
+                        <h3>강점</h3>
+                        <ul id="strengths"></ul>
+                    </section>
+                    <section>
+                        <h3>개선 기회</h3>
+                        <ul id="opportunities"></ul>
+                    </section>
+                    <section class="next-actions">
+                        <h3>다음 액션</h3>
+                        <ol id="next-actions"></ol>
+                    </section>
+                </div>
+            </article>
+        </section>
+    </main>
+    <script src="/app.js"></script>
+</body>
+</html>
